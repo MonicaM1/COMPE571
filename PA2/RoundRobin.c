@@ -18,10 +18,10 @@
 #define WORKLOAD3 25000
 #define WORKLOAD4 10000
 
-#define QUANTUM1 10000
-#define QUANTUM2 10000
-#define QUANTUM3 10000
-#define QUANTUM4 10000
+#define QUANTUM1 1000
+#define QUANTUM2 1000
+#define QUANTUM3 1000
+#define QUANTUM4 1000
 
 /************************************************************************************************
 					DO NOT CHANGE THE FUNCTION IMPLEMENTATION
@@ -105,51 +105,69 @@ int main(int argc, char const *argv[]) {
 	running3 = 1;
 	running4 = 1;
 
-	int processRunCount[] = {0, 0, 0, 0};
-
-	struct timespec arrival_time, start_time[4], end_time[4];
+	struct timespec arrival_time, end_time[4];
+	struct timespec csEnd, csStart;
+	float totalCSTime = 0.0;
+	int firstRun = 1;
 	clock_gettime(CLOCK_MONOTONIC, &arrival_time);
 	
 	while (running1 > 0 || running2 > 0 || running3 > 0 || running4 > 0)
 	{
 		if (running1 > 0)
 		{
-			processRunCount[0]++;
-			if(processRunCount[0] == 1) {clock_gettime(CLOCK_MONOTONIC, &start_time[0]);}
+			// printf("Running Process 1\n");
 			kill(pid1, SIGCONT);
+			clock_gettime(CLOCK_MONOTONIC, &csEnd);
 			usleep(QUANTUM1);
 			kill(pid1, SIGSTOP);
 			clock_gettime(CLOCK_MONOTONIC, &end_time[0]);
+
+			if (firstRun != 1) {
+				totalCSTime += (((csEnd.tv_sec - csStart.tv_sec) * 1e9) + (csEnd.tv_nsec - csStart.tv_nsec)) * 1e-9;
+				// printf("Running total of context switch time: %.8f\n", totalCSTime);
+			}
+
+			firstRun = 0;
+			clock_gettime(CLOCK_MONOTONIC, &csStart);
 		}
 
 		if (running2 > 0)
 		{
-			processRunCount[1]++;
-			if(processRunCount[1] == 1) {clock_gettime(CLOCK_MONOTONIC, &start_time[1]);}
+			// printf("Running Process 2\n");
 			kill(pid2, SIGCONT);
+			clock_gettime(CLOCK_MONOTONIC, &csEnd);
 			usleep(QUANTUM2);
 			kill(pid2, SIGSTOP);
 			clock_gettime(CLOCK_MONOTONIC, &end_time[1]);
+			totalCSTime += (((csEnd.tv_sec - csStart.tv_sec) * 1e9) + (csEnd.tv_nsec - csStart.tv_nsec)) * 1e-9;
+			// printf("Running total of context switch time: %.8f\n", totalCSTime);
+			clock_gettime(CLOCK_MONOTONIC, &csStart);
 		}
 
 		if (running3 > 0)
 		{
-			processRunCount[2]++;
-			if(processRunCount[2] == 1) {clock_gettime(CLOCK_MONOTONIC, &start_time[2]);}
+			// printf("Running Process 3\n");
 			kill(pid3, SIGCONT);
+			clock_gettime(CLOCK_MONOTONIC, &csEnd);
 			usleep(QUANTUM3);
 			kill(pid3, SIGSTOP);
 			clock_gettime(CLOCK_MONOTONIC, &end_time[2]);
+			totalCSTime += (((csEnd.tv_sec - csStart.tv_sec) * 1e9) + (csEnd.tv_nsec - csStart.tv_nsec)) * 1e-9;
+			// printf("Running total of context switch time: %.8f\n", totalCSTime);
+			clock_gettime(CLOCK_MONOTONIC, &csStart);
 		}
 
 		if (running4 > 0)
 		{
-			processRunCount[3]++;
-			if(processRunCount[3] == 1) {clock_gettime(CLOCK_MONOTONIC, &start_time[3]);}
+			// printf("Running Process 4\n");
 			kill(pid4, SIGCONT);
+			clock_gettime(CLOCK_MONOTONIC, &csEnd);
 			usleep(QUANTUM4);
 			kill(pid4, SIGSTOP);
 			clock_gettime(CLOCK_MONOTONIC, &end_time[3]);
+			totalCSTime += (((csEnd.tv_sec - csStart.tv_sec) * 1e9) + (csEnd.tv_nsec - csStart.tv_nsec)) * 1e-9;
+			// printf("Running total of context switch time: %.8f\n", totalCSTime);
+			clock_gettime(CLOCK_MONOTONIC, &csStart);
 		}
 
 		waitpid(pid1, &running1, WNOHANG);
@@ -168,5 +186,8 @@ int main(int argc, char const *argv[]) {
 		response_times[i] = (((end_time[i].tv_sec - arrival_time.tv_sec) * 1e9) + (end_time[i].tv_nsec - arrival_time.tv_nsec)) * 1e-9;
 		printf("Task %d Response Time: %.8fs\n", i + 1, response_times[i]);
 	}
+
+	printf("Total Context Switch Time: %.8fs\n", totalCSTime);
+
 	return 0;
 }
