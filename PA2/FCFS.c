@@ -130,6 +130,7 @@ int main(int argc, char const *argv[])
 	clock_gettime(CLOCK_MONOTONIC, &end_time[3]);
 	
 	float response_times[4];
+	printf("First Come First Serve:\n");
 	for (int i = 0; i < 4; i++)
 	{
 		response_times[i] = (((end_time[i].tv_sec - arrival_time.tv_sec) * 1e9) + (end_time[i].tv_nsec - arrival_time.tv_nsec)) * 1e-9;
