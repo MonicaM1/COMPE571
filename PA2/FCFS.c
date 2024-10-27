@@ -134,7 +134,7 @@ int main(int argc, char const *argv[])
 	for (int i = 0; i < 4; i++)
 	{
 		response_times[i] = (((end_time[i].tv_sec - arrival_time.tv_sec) * 1e9) + (end_time[i].tv_nsec - arrival_time.tv_nsec)) * 1e-9;
-		printf("Task %d Response Time: %.8fs\n", i, response_times[i]);
+		printf("Task %d Response Time: %.8fs\n", i+1, response_times[i]);
 	}
 
 	/************************************************************************************************
