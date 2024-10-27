@@ -180,7 +180,7 @@ int main(int argc, char const *argv[]) {
 		- Scheduling code ends here
 	************************************************************************************************/
 	float response_times[4];
-	printf("Quantum Size %d\n", QUANTUM1);
+	printf("Round Robin with Quantum Size %d:\n", QUANTUM1);
 	for (int i = 0; i < 4; i++)
 	{
 		response_times[i] = (((end_time[i].tv_sec - arrival_time.tv_sec) * 1e9) + (end_time[i].tv_nsec - arrival_time.tv_nsec)) * 1e-9;
